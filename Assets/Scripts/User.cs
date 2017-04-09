@@ -138,12 +138,11 @@ public class User : MonoBehaviour {
             else
             {
                 // 存储具体信息
-                //setInformation(allInfo);
                 PlayerPrefs.SetString("COOKIE", getCookie(www.responseHeaders["Set-Cookie"]));
                 PlayerPrefs.SetString("_tokenpasswd", userinfomation._tokenpasswd);
 
                 // 场景跳转
-                SceneManager.LoadScene(0);
+                SceneManager.LoadScene(sceneIndex);
             }
         }
     }

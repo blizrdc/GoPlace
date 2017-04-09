@@ -8,6 +8,9 @@ using UnityEngine.UI;
 public class Task : MonoBehaviour {
     private const string ip = "http://www.snowcheng.com/goplace/public";
     private const string showMethod = "/task/show";
+    private const string startMethod = "/task/start";
+    private const string promptMethod = "/task/prompt";
+    public UniWebView uwv;
     public Text text;
     public Text TaskText1;
     public Text TaskText2;
@@ -75,43 +78,53 @@ public class Task : MonoBehaviour {
     }
 
     private IEnumerator showTaskIEnumerator() {
-        /*if (!Input.location.isEnabledByUser)
-        {
-            error = false;
-            errormessage = "位置服务不可用";
-            yield break;
-        }
+         if (!Input.location.isEnabledByUser)
+         {
+             error = false;
+             errormessage = "位置服务不可用";
+             TaskText1.text = errormessage;
+             yield break;
+         }
 
-        Input.location.Start();
+         try
+         {
+             Input.location.Start();
+         }
+         catch (Exception e)
+         {
+             TaskText1.text = e.ToString();
+             yield break;
+         }
 
-        int maxWait = 5;
-        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
-        {
-            yield return new WaitForSeconds(1);
-            maxWait--;
-        }
+         int maxWait = 20;
+         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+         {
+             yield return new WaitForSeconds(1);
+             maxWait--;
+         }
 
-        // 服务初始化超时  
-        if (maxWait < 1)
-        {
-            error = false;
-            errormessage = "服务初始化超时";
-            yield break;
-        }
+         // 服务初始化超时  
+         if (maxWait < 1)
+         {
+             error = false;
+             errormessage = "服务初始化超时";
+             TaskText1.text = errormessage;
+             yield break;
+         }
 
-        // 连接失败  
-        if (Input.location.status == LocationServiceStatus.Failed)
-        {
-            error = false;
-            errormessage = "无法确定设备位置";
-            yield break;
-        }*/
-
-        latitude = 26.026674.ToString();// Input.location.lastData.latitude.ToString();
-        longitude = 119.217663.ToString();//Input.location.lastData.longitude.ToString();
+         // 连接失败  
+         if (Input.location.status == LocationServiceStatus.Failed)
+         {
+             error = false;
+             errormessage = "无法确定设备位置";
+             TaskText1.text = errormessage;
+             yield break;
+         }
+        latitude = Input.location.lastData.latitude.ToString();
+        longitude = Input.location.lastData.longitude.ToString();
         error = true;
 
-        // Input.location.Stop();
+        Input.location.Stop();
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Cookie", PlayerPrefs.GetString("COOKIE"));
         string data = "latitude=" + latitude + "&longitude=" + longitude + "&_tokenpasswd=" + PlayerPrefs.GetString("_tokenpasswd");
@@ -138,6 +151,7 @@ public class Task : MonoBehaviour {
                     PlayerPrefs.SetString("task1_lng", taskallinformation.place_informations[0].place.location.lng.ToString());
                     PlayerPrefs.SetString("task1_name", taskallinformation.place_informations[0].place.name);
                     PlayerPrefs.SetString("task1_address", taskallinformation.place_informations[0].place.address);
+                    PlayerPrefs.SetString("task1_uid", taskallinformation.place_informations[0].place.uid);
                     HiddenText1.text = "task1";
                 }
                 if (count >= 2)
@@ -147,6 +161,7 @@ public class Task : MonoBehaviour {
                     PlayerPrefs.SetString("task2_lng", taskallinformation.place_informations[1].place.location.lng.ToString());
                     PlayerPrefs.SetString("task2_name", taskallinformation.place_informations[1].place.name);
                     PlayerPrefs.SetString("task2_address", taskallinformation.place_informations[1].place.address);
+                    PlayerPrefs.SetString("task2_uid", taskallinformation.place_informations[1].place.uid);
                     HiddenText2.text = "task2";
                 }
                 if (count >= 3)
@@ -156,6 +171,7 @@ public class Task : MonoBehaviour {
                     PlayerPrefs.SetString("task3_lng", taskallinformation.place_informations[2].place.location.lng.ToString());
                     PlayerPrefs.SetString("task3_name", taskallinformation.place_informations[2].place.name);
                     PlayerPrefs.SetString("task3_address", taskallinformation.place_informations[2].place.address);
+                    PlayerPrefs.SetString("task3_uid", taskallinformation.place_informations[2].place.uid);
                     HiddenText3.text = "task3";
                 }
             }
@@ -165,27 +181,32 @@ public class Task : MonoBehaviour {
     public void startTask(string sign) {
         if (sign == "1")
         {
-            StartCoroutine(startTaskIEnumerator(ButtonText1));
+            StartCoroutine(startTaskIEnumerator(ButtonText1, "task1"));
         }
         else if (sign == "2")
         {
-            StartCoroutine(startTaskIEnumerator(ButtonText2));
+            StartCoroutine(startTaskIEnumerator(ButtonText2, "task1"));
         }
         else if (sign == "3")
         {
-            StartCoroutine(startTaskIEnumerator(ButtonText3));
+            StartCoroutine(startTaskIEnumerator(ButtonText3, "task1"));
         }
     }
 
-    private IEnumerator startTaskIEnumerator(Text buttontext)
+    private IEnumerator startTaskIEnumerator(Text buttontext, string taskValue)
     {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Cookie", PlayerPrefs.GetString("COOKIE"));
-        yield break;
-        /*string data = "lat=" + PlayerPrefs.GetString(hvalue + "_lat") + "&lng=" + PlayerPrefs.GetString(hvalue + "_lng") + "&name=" + PlayerPrefs.GetString(hvalue + "_name") + "&address=" + PlayerPrefs.GetString(hvalue + "_address");
+        string data = "lat=" + PlayerPrefs.GetString(taskValue + "_lat") 
+            + "&lng=" + PlayerPrefs.GetString(taskValue + "_lng") 
+            + "&name=" + PlayerPrefs.GetString(taskValue + "_name") 
+            + "&address=" + PlayerPrefs.GetString(taskValue + "_address") 
+            + "&uid=" + PlayerPrefs.GetString(taskValue + "_uid") 
+            + "&_tokenpasswd=" + PlayerPrefs.GetString("_tokenpasswd");
+
         byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
 
-        WWW www = new WWW("http://115.159.147.201/goplace/index.php/Home/user/task", bs, headers);
+        WWW www = new WWW(ip + startMethod, bs, headers);
         yield return www;
         if (www.error != null)
         {
@@ -194,31 +215,93 @@ public class Task : MonoBehaviour {
         }
         else
         {
-            if (www.text != "ok")
+            Status status = LitJson.JsonMapper.ToObject<Status>(www.text);
+            if (status.status != "200")
             {
-                Debug.Log(www.text);
-                yield return www.text;
+                Debug.Log(status.status);
+                yield return status.status;
             }
             else
             {
-                PlayerPrefs.SetString("task_lat", PlayerPrefs.GetString(hvalue + "_lat"));
-                PlayerPrefs.SetString("task_lng", PlayerPrefs.GetString(hvalue + "_lng"));
-                if (text == "1")
-                {
-                    btext1.text = "任务进行中";
-                }
-                else if (text == "2")
-                {
-                    btext2.text = "任务进行中";
-                }
-                else if (text == "3")
-                {
-                    btext3.text = "任务进行中";
-                }
+                PlayerPrefs.SetString("task_lat", PlayerPrefs.GetString(taskValue + "_lat"));
+                PlayerPrefs.SetString("task_lng", PlayerPrefs.GetString(taskValue + "_lng"));
+                buttontext.text = "任务进行中";
             }
         }
         yield break;
-    }*/
+    }
+
+    public void promptTask()
+    {
+        StartCoroutine(promptTaskIEnumerator());
+    }
+
+    private IEnumerator promptTaskIEnumerator()
+    {
+        if (!Input.location.isEnabledByUser)
+        {
+            Debug.Log("位置服务不可用");
+            yield break;
+        }
+
+        Input.location.Start();
+
+        int maxWait = 20;
+        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        {
+            yield return new WaitForSeconds(1);
+            maxWait--;
+        }
+
+        // 服务初始化超时  
+        if (maxWait < 1)
+        {
+            Debug.Log("服务初始化超时");
+            yield break;
+        }
+
+        // 连接失败  
+        if (Input.location.status == LocationServiceStatus.Failed)
+        {
+            Debug.Log("无法确定设备位置");
+            yield break;
+        }
+        else
+        {
+            string url = ip + promptMethod + "/lat/" + Input.location.lastData.latitude + "/lng/" + Input.location.lastData.longitude + "/tokenpasswd/" + PlayerPrefs.GetString("_tokenpasswd");
+            GameObject BrowserGo;
+            BrowserGo = new GameObject("uniWebViewObject");
+            uwv = BrowserGo.GetComponent<UniWebView>();
+            if (uwv == null)
+            {
+                uwv = BrowserGo.AddComponent<UniWebView>();
+            }
+            uwv.OnLoadComplete += OnLoadComplete;
+            uwv.OnWebViewShouldClose += OnWebViewShouldClose;
+            uwv.url = url;
+            uwv.Load();
+        }
+        Input.location.Stop();
+    }
+
+    private bool OnWebViewShouldClose(UniWebView webView)
+    {
+        webView.Hide();
+        UnityEngine.Object.Destroy(webView);
+        uwv = null;
+        return true;
+    }
+
+    private void OnLoadComplete(UniWebView webView, bool success, string errorMessage)
+    {
+        if (success)
+        {
+            webView.Show();
+        }
+        else
+        {
+            Debug.LogError("Something wrong in web view loading: " + errorMessage);
+        }
     }
 }
 
@@ -294,4 +377,10 @@ class DiReviewKeyword
     public int keyword_num;
     public string keyword_tag;
     public int keyword_type;
+}
+
+[System.Serializable]
+class Status
+{
+    public string status;
 }
