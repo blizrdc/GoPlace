@@ -102,9 +102,8 @@ public class UniWebViewPlugin {
     }
 
     public static void Load(string name, string url) {
-        if (Application . platform == RuntimePlatform . OSXEditor)
-        {
-            _UniWebViewLoad (name ,url);
+        if (Application.platform == RuntimePlatform.OSXEditor) {
+            _UniWebViewLoad(name, url);
         }
     }
 

@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
-using System . Collections;
-using UnityEngine . SceneManagement;
 using UnityEngine . UI;
-using System . Collections . Generic;
-using System;
-using LitJson;
+
 public class GameMange : MonoBehaviour {
 
     public Text inputfield1;

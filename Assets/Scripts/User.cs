@@ -140,7 +140,8 @@ public class User : MonoBehaviour {
                 // 存储具体信息
                 PlayerPrefs.SetString("COOKIE", getCookie(www.responseHeaders["Set-Cookie"]));
                 PlayerPrefs.SetString("_tokenpasswd", userinfomation._tokenpasswd);
-
+                PlayerPrefs.SetString("user_id", userinfomation.userallinfo.id.ToString());
+                PlayerPrefs.SetString("user_email", userinfomation.userallinfo.email);
                 // 场景跳转
                 SceneManager.LoadScene(sceneIndex);
             }
@@ -151,19 +152,33 @@ public class User : MonoBehaviour {
     /// 注册调用的方法
     /// </summary>
     public void Register() {
-        GameObject BrowserGo;
-        BrowserGo = new GameObject("uniWebViewObject");
-        uniwebview = BrowserGo.GetComponent<UniWebView>();
-        if (uniwebview == null)
+        string url = ip + "/register";
+        var webViewGameObject = GameObject.Find("WebView");
+        if (webViewGameObject == null)
         {
-            uniwebview = BrowserGo.AddComponent<UniWebView>();
+            webViewGameObject = new GameObject("WebView");
         }
-        uniwebview.OnLoadComplete += OnLoadComplete;
-        uniwebview.OnWebViewShouldClose += OnWebViewShouldClose;
-        uniwebview.url = ip + "/user/login";
-        uniwebview.Load();
+        var webView = webViewGameObject.AddComponent<UniWebView>();
+        webView.OnLoadComplete += OnLoadComplete;
+        webView.InsetsForScreenOreitation += InsetsForScreenOreitation;
+        webView.OnWebViewShouldClose += OnWebViewShouldClose;
+        webView.url = url;
+        webView.Load();
     }
-    
+
+    UniWebViewEdgeInsets InsetsForScreenOreitation(UniWebView webView, UniWebViewOrientation orientation)
+    {
+
+        if (orientation == UniWebViewOrientation.Portrait)
+        {
+            return new UniWebViewEdgeInsets(5, 5, 5, 5);
+        }
+        else
+        {
+            return new UniWebViewEdgeInsets(5, 5, 5, 5);
+        }
+    }
+
     /*private void setInformation(AllInfo allinfo)
     {
         PlayerPrefs.SetString("status", allinfo.status);

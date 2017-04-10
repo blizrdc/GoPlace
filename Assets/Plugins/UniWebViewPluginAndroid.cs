@@ -183,6 +183,12 @@ public class UniWebViewPlugin {
         }
     }
 
+    public static void LoadWithOverviewMode(string name, bool overview) {
+        if (Application.platform == RuntimePlatform.Android) {
+            webView.CallStatic("_UniWebViewLoadWithOverviewMode", name, overview);
+        }
+    }
+
     public static void SetUserAgent(string userAgent) {
         if (Application.platform == RuntimePlatform.Android) {
             webView.CallStatic("_UniWebViewSetUserAgent", userAgent);
@@ -252,5 +258,10 @@ public class UniWebViewPlugin {
         }
     }
 
+    public static void SetWebContentsDebuggingEnabled(bool enabled) {
+        if (Application.platform == RuntimePlatform.Android) {
+            webView.CallStatic("_UniWebViewSetWebContentsDebuggingEnabled", enabled);
+        }
+    }
 }
 #endif

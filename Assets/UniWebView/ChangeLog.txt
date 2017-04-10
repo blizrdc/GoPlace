@@ -1,5 +1,17 @@
 ## UniWebView - An easier solution for integrating WebView to your mobile games
 
+2.9.1
+
+Fix: Add a null check for Android web view. This prevented a potential crash when navigating from javascript
+
+------------------------
+2.9.0
+
+Add: Android remote web content debugging support. Now you can debug your web page in Android with Chrome. Just set `SetWebContentsDebuggingEnabled` with true to enable it.
+Add: Ability for loading page with overview mode for Android. 
+Fix: Now all key down events are forwarded to Unity side by OnKeyDown callback in Android, even for TV remote controller and real device keys.
+
+------------------------
 2.8.0
 
 Add: An option (`openLinksInExternalBrowser`) that all the links should be opened in an external browser or not. It will be useful if you want to open a URL in Mobile Safari or Chrome, instead of opening it in UniWebView. Default is false.

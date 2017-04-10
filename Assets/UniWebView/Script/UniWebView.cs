@@ -1,4 +1,4 @@
-
+#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
 //
 //    UniWebView.cs
 //  Created by Wang Wei(@onevcat) on 2013-10-20.
@@ -103,7 +103,7 @@ public class UniWebView : MonoBehaviour {
     public event InsetsForScreenOreitationDelegate InsetsForScreenOreitation;
 
     #endregion
-
+    
     [SerializeField]
     private UniWebViewEdgeInsets _insets = new UniWebViewEdgeInsets(0,0,0,0);
 
@@ -606,6 +606,22 @@ public class UniWebView : MonoBehaviour {
     }
 
     /// <summary>
+    /// Set to load with overview mode or not.
+    /// </summary>
+    /// <param name="overview">
+    /// If set to <c>true</c>, use overview mode to load the page.
+    /// </param>
+    /// <description>
+    /// This method only works for Android. If you need to load your page with overview mode, you may
+    /// want to enable it before you loading and showing your page.
+    /// </description>
+    public void LoadWithOverviewMode(bool overview) {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        UniWebViewPlugin.LoadWithOverviewMode(gameObject.name, overview);
+        #endif
+    }
+
+    /// <summary>
     /// Determines whether the webview can go back.
     /// </summary>
     /// <returns><c>true</c> if this instance can go back, which means there is at least one page in the navigation stack below; 
@@ -717,6 +733,23 @@ public class UniWebView : MonoBehaviour {
         Debug.LogWarning("Not implemented for Windows Phone 8.");        
         #else
         UniWebViewPlugin.SetHorizontalScrollBarShow(gameObject.name, show);
+        #endif
+    }
+
+    /// <summary>
+    /// Set web content could be debug or not. Only works for Android. 
+    /// </summary>
+    /// <description>
+    /// You can enable Remote Debugging for Android devices by calling this method and passing true. See Google's 
+    /// Remote Debugging Android Devices documentation for more about it.
+    /// https://developers.google.com/web/tools/chrome-devtools/debug/remote-debugging/remote-debugging
+    /// 
+    /// This method will do nothing for iOS or editor. 
+    /// </description>
+    /// <param name="enabled">Whether this page could be debug or not.</param>
+    public static void SetWebContentsDebuggingEnabled(bool enabled) {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        UniWebViewPlugin.SetWebContentsDebuggingEnabled(enabled);
         #endif
     }
     
@@ -981,4 +1014,4 @@ public class UniWebView : MonoBehaviour {
     #endif
     #endregion
 }
-
+#endif //UNITY_IOS || UNITY_ANDROID

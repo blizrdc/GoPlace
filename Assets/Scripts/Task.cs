@@ -5,12 +5,13 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Task : MonoBehaviour {
+public class Task : MonoBehaviour
+{
     private const string ip = "http://www.snowcheng.com/goplace/public";
     private const string showMethod = "/task/show";
     private const string startMethod = "/task/start";
     private const string promptMethod = "/task/prompt";
-    public UniWebView uwv;
+    private const string submitMethod = "/task/submit";
     public Text text;
     public Text TaskText1;
     public Text TaskText2;
@@ -29,17 +30,19 @@ public class Task : MonoBehaviour {
     private string errormessage;
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         error = false;
         errormessage = "发生未知问题";
         latitude = null;
         longitude = null;
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     /// <summary>
     /// Post错误处理
@@ -56,12 +59,14 @@ public class Task : MonoBehaviour {
         return true;
     }
 
-    private void flushGpsInformation() {
+    private void flushGpsInformation()
+    {
         latitude = null;
         longitude = null;
     }
 
-    private bool gpsError(bool _error, string _latitude, string _longitude) {
+    private bool gpsError(bool _error, string _latitude, string _longitude)
+    {
         if (!_error)
         {
             return false;
@@ -73,53 +78,55 @@ public class Task : MonoBehaviour {
         return true;
     }
 
-    public void showTask() {
+    public void showTask()
+    {
         StartCoroutine(showTaskIEnumerator());
     }
 
-    private IEnumerator showTaskIEnumerator() {
-         if (!Input.location.isEnabledByUser)
-         {
-             error = false;
-             errormessage = "位置服务不可用";
-             TaskText1.text = errormessage;
-             yield break;
-         }
+    private IEnumerator showTaskIEnumerator()
+    {
+        if (!Input.location.isEnabledByUser)
+        {
+            error = false;
+            errormessage = "位置服务不可用";
+            TaskText1.text = errormessage;
+            yield break;
+        }
 
-         try
-         {
-             Input.location.Start();
-         }
-         catch (Exception e)
-         {
-             TaskText1.text = e.ToString();
-             yield break;
-         }
+        try
+        {
+            Input.location.Start();
+        }
+        catch (Exception e)
+        {
+            TaskText1.text = e.ToString();
+            yield break;
+        }
 
-         int maxWait = 20;
-         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
-         {
-             yield return new WaitForSeconds(1);
-             maxWait--;
-         }
+        int maxWait = 20;
+        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        {
+            yield return new WaitForSeconds(1);
+            maxWait--;
+        }
 
-         // 服务初始化超时  
-         if (maxWait < 1)
-         {
-             error = false;
-             errormessage = "服务初始化超时";
-             TaskText1.text = errormessage;
-             yield break;
-         }
+        // 服务初始化超时  
+        if (maxWait < 1)
+        {
+            error = false;
+            errormessage = "服务初始化超时";
+            TaskText1.text = errormessage;
+            yield break;
+        }
 
-         // 连接失败  
-         if (Input.location.status == LocationServiceStatus.Failed)
-         {
-             error = false;
-             errormessage = "无法确定设备位置";
-             TaskText1.text = errormessage;
-             yield break;
-         }
+        // 连接失败  
+        if (Input.location.status == LocationServiceStatus.Failed)
+        {
+            error = false;
+            errormessage = "无法确定设备位置";
+            TaskText1.text = errormessage;
+            yield break;
+        }
         latitude = Input.location.lastData.latitude.ToString();
         longitude = Input.location.lastData.longitude.ToString();
         error = true;
@@ -178,7 +185,8 @@ public class Task : MonoBehaviour {
         }
     }
 
-    public void startTask(string sign) {
+    public void startTask(string sign)
+    {
         if (sign == "1")
         {
             StartCoroutine(startTaskIEnumerator(ButtonText1, "task1"));
@@ -197,11 +205,11 @@ public class Task : MonoBehaviour {
     {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Cookie", PlayerPrefs.GetString("COOKIE"));
-        string data = "lat=" + PlayerPrefs.GetString(taskValue + "_lat") 
-            + "&lng=" + PlayerPrefs.GetString(taskValue + "_lng") 
-            + "&name=" + PlayerPrefs.GetString(taskValue + "_name") 
-            + "&address=" + PlayerPrefs.GetString(taskValue + "_address") 
-            + "&uid=" + PlayerPrefs.GetString(taskValue + "_uid") 
+        string data = "lat=" + PlayerPrefs.GetString(taskValue + "_lat")
+            + "&lng=" + PlayerPrefs.GetString(taskValue + "_lng")
+            + "&name=" + PlayerPrefs.GetString(taskValue + "_name")
+            + "&address=" + PlayerPrefs.GetString(taskValue + "_address")
+            + "&uid=" + PlayerPrefs.GetString(taskValue + "_uid")
             + "&_tokenpasswd=" + PlayerPrefs.GetString("_tokenpasswd");
 
         byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
@@ -259,36 +267,49 @@ public class Task : MonoBehaviour {
             Debug.Log("服务初始化超时");
             yield break;
         }
-
+        
         // 连接失败  
         if (Input.location.status == LocationServiceStatus.Failed)
         {
             Debug.Log("无法确定设备位置");
             yield break;
         }
+        latitude = Input.location.lastData.latitude.ToString();
+        longitude = Input.location.lastData.longitude.ToString();
+        Input.location.Stop();
+
+        string url = ip + promptMethod + "/latitude/" + latitude + "/longitude/" + longitude + "/id/" + PlayerPrefs.GetString("user_id") + "/email/" + PlayerPrefs.GetString("user_email");
+        var webViewGameObject = GameObject.Find("WebView");
+        if (webViewGameObject == null)
+        {
+            webViewGameObject = new GameObject("WebView");
+        }
+        var webView = webViewGameObject.AddComponent<UniWebView>();
+        webView.OnLoadComplete += OnLoadComplete;
+        webView.InsetsForScreenOreitation += InsetsForScreenOreitation;
+        webView.OnWebViewShouldClose += OnWebViewShouldClose;
+        webView.url = url;
+        webView.Load();
+    }
+
+    UniWebViewEdgeInsets InsetsForScreenOreitation(UniWebView webView, UniWebViewOrientation orientation)
+    {
+
+        if (orientation == UniWebViewOrientation.Portrait)
+        {
+            return new UniWebViewEdgeInsets(5, 5, 5, 5);
+        }
         else
         {
-            string url = ip + promptMethod + "/lat/" + Input.location.lastData.latitude + "/lng/" + Input.location.lastData.longitude + "/tokenpasswd/" + PlayerPrefs.GetString("_tokenpasswd");
-            GameObject BrowserGo;
-            BrowserGo = new GameObject("uniWebViewObject");
-            uwv = BrowserGo.GetComponent<UniWebView>();
-            if (uwv == null)
-            {
-                uwv = BrowserGo.AddComponent<UniWebView>();
-            }
-            uwv.OnLoadComplete += OnLoadComplete;
-            uwv.OnWebViewShouldClose += OnWebViewShouldClose;
-            uwv.url = url;
-            uwv.Load();
+            return new UniWebViewEdgeInsets(5, 5, 5, 5);
         }
-        Input.location.Stop();
     }
 
     private bool OnWebViewShouldClose(UniWebView webView)
     {
         webView.Hide();
         UnityEngine.Object.Destroy(webView);
-        uwv = null;
+        webView = null;
         return true;
     }
 
@@ -301,6 +322,66 @@ public class Task : MonoBehaviour {
         else
         {
             Debug.LogError("Something wrong in web view loading: " + errorMessage);
+        }
+    }
+
+    public void submitTask()
+    {
+        StartCoroutine(submitTaskIEnumerator());
+    }
+
+    private IEnumerator submitTaskIEnumerator()
+    {
+        if (!Input.location.isEnabledByUser)
+        {
+            Debug.Log("位置服务不可用");
+            yield break;
+        }
+
+        Input.location.Start();
+
+        int maxWait = 20;
+        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        {
+            yield return new WaitForSeconds(1);
+            maxWait--;
+        }
+
+        // 服务初始化超时  
+        if (maxWait < 1)
+        {
+            Debug.Log("服务初始化超时");
+            yield break;
+        }
+
+        // 连接失败  
+        if (Input.location.status == LocationServiceStatus.Failed)
+        {
+            Debug.Log("无法确定设备位置");
+            yield break;
+        }
+        latitude = Input.location.lastData.latitude.ToString();
+        longitude = Input.location.lastData.longitude.ToString();
+        Input.location.Stop();
+
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("Cookie", PlayerPrefs.GetString("COOKIE"));
+        string data = "latitude=" + latitude + "&longitude=" + longitude + "&_tokenpasswd=" + PlayerPrefs.GetString("_tokenpasswd");
+        byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+        WWW www = new WWW(ip + submitMethod, bs, headers);
+        yield return www;
+        if (wwwError(www))
+        {
+            MethodMessage methodMessage = LitJson.JsonMapper.ToObject<MethodMessage>(www.text);
+            if (methodMessage.status != "200")
+            {
+                Debug.Log(methodMessage.status);
+                yield return methodMessage.status;
+            }
+            else
+            {
+                TaskText1.text = methodMessage.message;
+            }
         }
     }
 }
@@ -384,3 +465,12 @@ class Status
 {
     public string status;
 }
+
+[System.Serializable]
+class MethodMessage
+{
+    public string status;
+    public string message;
+    public string message_status;
+}
+
